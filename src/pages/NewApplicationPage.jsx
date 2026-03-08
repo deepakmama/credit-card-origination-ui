@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { submitApplication } from '../api/cardApi'
 import CardTypeSelector from '../components/CardTypeSelector'
 import LoadingSpinner from '../components/LoadingSpinner'
+import ProveVerificationPanel from '../components/ProveVerificationPanel'
 
 const STEPS = ['Personal Info', 'Card Selection']
 
@@ -27,8 +28,24 @@ export default function NewApplicationPage() {
   const [form, setForm] = useState(initialForm)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [provedFields, setProvedFields] = useState(new Set())
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const handleProvePrefill = (data) => {
+    setForm(f => ({
+      ...f,
+      firstName: data.firstName || f.firstName,
+      lastName:  data.lastName  || f.lastName,
+      ssn:       data.ssn       || f.ssn,
+      dob:       data.dob       || f.dob,
+      email:     data.email     || f.email,
+      phone:     data.phone     || f.phone,
+      address:   data.address   || f.address,
+    }))
+    setProvedFields(new Set(['firstName', 'lastName', 'ssn', 'dob', 'email', 'phone', 'address']))
+  }
+
   const handleChange = e => {
     const { name, value, type, checked } = e.target
     set(name, type === 'checkbox' ? checked : value)
@@ -111,40 +128,77 @@ export default function NewApplicationPage() {
       {/* Step 1: Personal Info */}
       {step === 0 && (
         <form onSubmit={handleNext} className="space-y-4">
+          <ProveVerificationPanel onPrefill={handleProvePrefill} />
+
           <div className="card p-6 space-y-4">
             <h2 className="font-semibold text-gray-800">Personal Information</h2>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="section-label">First Name *</label>
+                <label className="section-label">
+                  First Name *
+                  {provedFields.has('firstName') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="firstName" value={form.firstName} onChange={handleChange} required className="form-input" />
               </div>
               <div>
-                <label className="section-label">Last Name *</label>
+                <label className="section-label">
+                  Last Name *
+                  {provedFields.has('lastName') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="lastName" value={form.lastName} onChange={handleChange} required className="form-input" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="section-label">SSN * (XXX-XX-XXXX)</label>
+                <label className="section-label">
+                  SSN * (XXX-XX-XXXX)
+                  {provedFields.has('ssn') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="ssn" value={form.ssn} onChange={handleChange} required placeholder="123-45-6789" className="form-input" />
               </div>
               <div>
-                <label className="section-label">Date of Birth</label>
+                <label className="section-label">
+                  Date of Birth
+                  {provedFields.has('dob') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="dob" type="date" value={form.dob} onChange={handleChange} className="form-input" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="section-label">Email</label>
+                <label className="section-label">
+                  Email
+                  {provedFields.has('email') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="email" type="email" value={form.email} onChange={handleChange} className="form-input" />
               </div>
               <div>
-                <label className="section-label">Phone</label>
+                <label className="section-label">
+                  Phone
+                  {provedFields.has('phone') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                  )}
+                </label>
                 <input name="phone" value={form.phone} onChange={handleChange} className="form-input" />
               </div>
             </div>
             <div>
-              <label className="section-label">Address</label>
+              <label className="section-label">
+                Address
+                {provedFields.has('address') && (
+                  <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-700">PROVE</span>
+                )}
+              </label>
               <input name="address" value={form.address} onChange={handleChange} className="form-input" />
             </div>
           </div>
