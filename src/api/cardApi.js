@@ -38,5 +38,5 @@ export const skipAuthUser = (appId) =>
 export const initiateBalanceTransfer = (appId) =>
   api.post(`/card-application/${appId}/balance-transfer`).then(r => r.data)
 
-export const prefillWithProve = (phone) =>
-  api.post('/card-application/prefill', { phone }).then(r => r.data)
+export const prefillWithProve = (phone, ssn4) =>
+  api.post('/card-application/prefill', { phone, ssn4 }).then(r => r.data)

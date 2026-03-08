@@ -3,16 +3,19 @@ import { prefillWithProve } from '../api/cardApi'
 
 export default function ProveVerificationPanel({ onPrefill }) {
   const [phone, setPhone] = useState('')
+  const [ssn4, setSsn4] = useState('')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(null) // null | 'verified' | 'not_found'
   const [verifiedName, setVerifiedName] = useState('')
   const [verifiedPhone, setVerifiedPhone] = useState('')
 
+  const canSubmit = phone.trim() && ssn4.trim().length === 4
+
   const handleVerify = async () => {
-    if (!phone.trim()) return
+    if (!canSubmit) return
     setLoading(true)
     try {
-      const data = await prefillWithProve(phone.trim())
+      const data = await prefillWithProve(phone.trim(), ssn4.trim())
       if (data.verificationStatus === 'VERIFIED') {
         setStatus('verified')
         setVerifiedName(`${data.firstName} ${data.lastName}`)
@@ -30,6 +33,11 @@ export default function ProveVerificationPanel({ onPrefill }) {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') handleVerify()
+  }
+
+  const handleSsn4Change = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 4)
+    setSsn4(val)
   }
 
   return (
@@ -54,8 +62,8 @@ export default function ProveVerificationPanel({ onPrefill }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           </svg>
           <div>
-            <p className="text-sm font-semibold text-amber-800">Phone number not recognized</p>
-            <p className="text-xs text-amber-700 mt-0.5">Please fill in your details manually below.</p>
+            <p className="text-sm font-semibold text-amber-800">Identity not recognized</p>
+            <p className="text-xs text-amber-700 mt-0.5">Phone and last 4 of SSN did not match — please fill in your details manually below.</p>
           </div>
         </div>
       ) : (
@@ -75,13 +83,22 @@ export default function ProveVerificationPanel({ onPrefill }) {
               value={phone}
               onChange={e => setPhone(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="617-555-0001"
+              placeholder="Phone  e.g. 617-555-0001"
               className="flex-1 px-3 py-2 text-sm border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
+            />
+            <input
+              type="password"
+              value={ssn4}
+              onChange={handleSsn4Change}
+              onKeyDown={handleKeyDown}
+              placeholder="Last 4 SSN"
+              maxLength={4}
+              className="w-28 px-3 py-2 text-sm border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white tracking-widest"
             />
             <button
               type="button"
               onClick={handleVerify}
-              disabled={loading || !phone.trim()}
+              disabled={loading || !canSubmit}
               className="px-4 py-2 text-sm font-semibold text-white bg-purple-700 rounded-lg hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
             >
               {loading ? (
@@ -95,7 +112,7 @@ export default function ProveVerificationPanel({ onPrefill }) {
               ) : 'Verify & Prefill'}
             </button>
           </div>
-          <p className="text-xs text-purple-500 mt-2">Try: 617-555-0001 through 617-555-0004</p>
+          <p className="text-xs text-purple-500 mt-2">Try: 617-555-0001 + 6789 · 617-555-0002 + 3333 · 617-555-0003 + 5555 · 617-555-0004 + 4444</p>
         </div>
       )}
     </div>

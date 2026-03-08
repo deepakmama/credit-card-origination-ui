@@ -15,6 +15,14 @@ const EMPLOYMENT_TYPES = [
   { value: 'RETIRED', label: 'Retired' },
 ]
 
+// Simulated bank-on-file financial data keyed by phone
+const BANK_FINANCIAL_DATA = {
+  '617-555-0001': { annualIncome: 87500,  monthlyHousingPayment: 1850 },
+  '617-555-0002': { annualIncome: 142000, monthlyHousingPayment: 2800 },
+  '617-555-0003': { annualIncome: 58000,  monthlyHousingPayment: 1100 },
+  '617-555-0004': { annualIncome: 103000, monthlyHousingPayment: 2200 },
+}
+
 const initialForm = {
   firstName: '', lastName: '', ssn: '', dob: '', email: '', phone: '', address: '',
   employmentType: 'EMPLOYED', employerName: '', annualIncome: '', monthlyHousingPayment: '',
@@ -29,6 +37,8 @@ export default function NewApplicationPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [provedFields, setProvedFields] = useState(new Set())
+  const [bankFields, setBankFields] = useState(new Set())
+  const [bankLoading, setBankLoading] = useState(false)
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -46,9 +56,32 @@ export default function NewApplicationPage() {
     setProvedFields(new Set(['firstName', 'lastName', 'ssn', 'dob', 'email', 'phone', 'address']))
   }
 
+  const handleBankRelationshipChange = async (checked) => {
+    set('existingBankRelationship', checked)
+    if (checked) {
+      setBankLoading(true)
+      await new Promise(r => setTimeout(r, 900))
+      const data = BANK_FINANCIAL_DATA[form.phone] || { annualIncome: 72000, monthlyHousingPayment: 1500 }
+      setForm(f => ({
+        ...f,
+        annualIncome: String(data.annualIncome),
+        monthlyHousingPayment: String(data.monthlyHousingPayment),
+      }))
+      setBankFields(new Set(['annualIncome', 'monthlyHousingPayment']))
+      setBankLoading(false)
+    } else {
+      setForm(f => ({ ...f, annualIncome: '', monthlyHousingPayment: '' }))
+      setBankFields(new Set())
+    }
+  }
+
   const handleChange = e => {
     const { name, value, type, checked } = e.target
-    set(name, type === 'checkbox' ? checked : value)
+    if (name === 'existingBankRelationship') {
+      handleBankRelationshipChange(checked)
+    } else {
+      set(name, type === 'checkbox' ? checked : value)
+    }
   }
 
   const handleNext = e => {
@@ -217,20 +250,39 @@ export default function NewApplicationPage() {
                 <input name="employerName" value={form.employerName} onChange={handleChange} className="form-input" />
               </div>
             </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input name="existingBankRelationship" type="checkbox" checked={form.existingBankRelationship} onChange={handleChange} disabled={bankLoading} className="w-4 h-4 accent-green-600" />
+              <span className="text-sm text-gray-700">I have an existing bank relationship</span>
+              {bankLoading && (
+                <span className="flex items-center gap-1 text-xs text-green-700">
+                  <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Fetching bank data…
+                </span>
+              )}
+            </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="section-label">Annual Income ($) *</label>
+                <label className="section-label">
+                  Annual Income ($) *
+                  {bankFields.has('annualIncome') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700">BANK</span>
+                  )}
+                </label>
                 <input name="annualIncome" type="number" value={form.annualIncome} onChange={handleChange} required min="0" className="form-input" />
               </div>
               <div>
-                <label className="section-label">Monthly Housing Payment ($)</label>
+                <label className="section-label">
+                  Monthly Housing Payment ($)
+                  {bankFields.has('monthlyHousingPayment') && (
+                    <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700">BANK</span>
+                  )}
+                </label>
                 <input name="monthlyHousingPayment" type="number" value={form.monthlyHousingPayment} onChange={handleChange} min="0" className="form-input" />
               </div>
             </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input name="existingBankRelationship" type="checkbox" checked={form.existingBankRelationship} onChange={handleChange} className="w-4 h-4 accent-green-600" />
-              <span className="text-sm text-gray-700">I have an existing bank relationship</span>
-            </label>
           </div>
 
           <div className="flex justify-end">
