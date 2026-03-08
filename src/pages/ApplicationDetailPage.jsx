@@ -8,6 +8,7 @@ import DocumentUploadPanel from '../components/DocumentUploadPanel'
 import LoadingSpinner from '../components/LoadingSpinner'
 import AuthUserPanel from '../components/AuthUserPanel'
 import BalanceTransferPanel from '../components/BalanceTransferPanel'
+import AdverseActionLetter from '../components/AdverseActionLetter'
 
 const fmt = (n) => n != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n) : '—'
 const fmtDate = (d) => d ? new Date(d).toLocaleString() : '—'
@@ -47,6 +48,7 @@ export default function ApplicationDetailPage() {
   const [selectedSsn, setSelectedSsn] = useState('')
   const [reprocessError, setReprocessError] = useState(null)
   const [error, setError] = useState(null)
+  const [showLetter, setShowLetter] = useState(false)
 
   const loadApp = () => {
     setLoading(true)
@@ -95,8 +97,21 @@ export default function ApplicationDetailPage() {
         <div className="text-right text-sm text-gray-500">
           <div>Submitted: {fmtDate(app.submittedAt)}</div>
           <div>Updated: {fmtDate(app.updatedAt)}</div>
+          {app.status === 'DENIED' && (
+            <button
+              onClick={() => setShowLetter(true)}
+              className="mt-3 px-4 py-2 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 flex items-center gap-1.5 ml-auto"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Adverse Action Letter
+            </button>
+          )}
         </div>
       </div>
+
+      {showLetter && <AdverseActionLetter app={app} onClose={() => setShowLetter(false)} />}
 
       {/* Pipeline */}
       <div className="mb-6">
@@ -152,7 +167,7 @@ export default function ApplicationDetailPage() {
           <div className="card p-5">
             <h3 className="font-semibold text-gray-800 mb-3">Card Request</h3>
             <div className="space-y-0">
-              <InfoRow label="Card Type" value={app.cardRequest?.cardType?.replace(/_/g, ' ')} />
+              <InfoRow label="Card Type" value={{ CASH_BACK: 'Summit Reserve', BALANCE_TRANSFER: 'Summit', NEW_TO_CREDIT: 'Amp' }[app.cardRequest?.cardType] || app.cardRequest?.cardType?.replace(/_/g, ' ')} />
               <InfoRow label="Requested Limit" value={fmt(app.cardRequest?.requestedCreditLimit)} />
               {app.cardRequest?.cardType === 'BALANCE_TRANSFER' && (
                 <>

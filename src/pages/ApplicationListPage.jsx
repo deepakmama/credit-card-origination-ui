@@ -102,7 +102,7 @@ export default function ApplicationListPage() {
                     <div className="text-xs text-gray-400 font-mono">{app.id?.slice(0, 8)}...</div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-gray-700">{app.cardRequest?.cardType?.replace(/_/g, ' ')}</span>
+                    <span className="text-gray-700">{{ CASH_BACK: 'Summit Reserve', BALANCE_TRANSFER: 'Summit', NEW_TO_CREDIT: 'Amp' }[app.cardRequest?.cardType] || app.cardRequest?.cardType?.replace(/_/g, ' ')}</span>
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={app.status} />

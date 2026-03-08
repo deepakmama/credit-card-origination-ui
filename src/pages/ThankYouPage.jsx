@@ -47,7 +47,7 @@ export default function ThankYouPage() {
           </div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-gray-500">Card Type</span>
-            <span className="text-sm font-medium">{app.cardRequest?.cardType?.replace(/_/g, ' ')}</span>
+            <span className="text-sm font-medium">{{ CASH_BACK: 'Summit Reserve', BALANCE_TRANSFER: 'Summit', NEW_TO_CREDIT: 'Amp' }[app.cardRequest?.cardType] || app.cardRequest?.cardType?.replace(/_/g, ' ')}</span>
           </div>
           {isApproved && (
             <>

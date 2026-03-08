@@ -26,10 +26,17 @@ export default function DashboardPage() {
   const avgCreditScore = apps.filter(a => a.creditScore).reduce((s, a, _, arr) => s + a.creditScore / arr.length, 0)
   const avgLimit = issued.filter(a => a.creditLimit).reduce((s, a, _, arr) => s + a.creditLimit / arr.length, 0)
 
+  // Prefill insights
+  const withBank    = apps.filter(a => a.applicant?.existingBankRelationship)
+  const withoutBank = apps.filter(a => !a.applicant?.existingBankRelationship)
+  const bankApprovalRate    = pct(withBank.filter(a => a.status === 'CARD_ISSUED').length, withBank.length)
+  const nonBankApprovalRate = pct(withoutBank.filter(a => a.status === 'CARD_ISSUED').length, withoutBank.length)
+
   // Card type breakdown
+  const CARD_TYPE_LABELS = { CASH_BACK: 'Summit Reserve', BALANCE_TRANSFER: 'Summit', NEW_TO_CREDIT: 'Amp' }
   const byCardType = ['CASH_BACK','BALANCE_TRANSFER','NEW_TO_CREDIT'].map(ct => ({
     type: ct,
-    label: ct.replace(/_/g, ' '),
+    label: CARD_TYPE_LABELS[ct] || ct.replace(/_/g, ' '),
     total: apps.filter(a => a.cardRequest?.cardType === ct).length,
     issued: apps.filter(a => a.cardRequest?.cardType === ct && a.status === 'CARD_ISSUED').length,
     denied: apps.filter(a => a.cardRequest?.cardType === ct && a.status === 'DENIED').length,
@@ -53,12 +60,13 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         {[
           { label: 'Total Applications', value: total, color: 'bg-citizens-green-light text-citizens-green' },
           { label: 'Approval Rate', value: pct(issued.length, total), color: 'bg-green-50 text-green-700' },
           { label: 'Avg Credit Limit', value: fmt(avgLimit), color: 'bg-blue-50 text-blue-700' },
           { label: 'Avg Credit Score', value: avgCreditScore ? Math.round(avgCreditScore) : '—', color: 'bg-amber-50 text-amber-700' },
+          { label: 'Bank Prefill Rate', value: pct(withBank.length, total), color: 'bg-purple-50 text-purple-700' },
         ].map(kpi => (
           <div key={kpi.label} className={`card p-5 ${kpi.color}`}>
             <div className="text-3xl font-bold mb-1">{kpi.value}</div>
@@ -133,6 +141,54 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Prefill Insights */}
+      <div className="card p-6 mb-6">
+        <h2 className="font-semibold text-gray-800 mb-4">Prefill Insights</h2>
+        <div className="grid grid-cols-2 gap-6">
+          {/* Bank prefill breakdown */}
+          <div>
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Bank Relationship Prefill</div>
+            <div className="space-y-3">
+              {[
+                { label: 'With Bank Prefill', count: withBank.length, rate: bankApprovalRate, color: 'bg-purple-400' },
+                { label: 'Without Bank Prefill', count: withoutBank.length, rate: nonBankApprovalRate, color: 'bg-gray-300' },
+              ].map(row => (
+                <div key={row.label}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">{row.label}</span>
+                    <span className="font-medium text-gray-700">{row.count} apps · <span className="text-green-600">{row.rate} approved</span></span>
+                  </div>
+                  <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${row.color} rounded-full transition-all`}
+                         style={{ width: total > 0 ? `${row.count / total * 100}%` : '0%' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 gap-3 content-start">
+            <div className="bg-purple-50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-purple-700">{withBank.length}</div>
+              <div className="text-xs text-purple-500 mt-0.5">Used Bank Prefill</div>
+            </div>
+            <div className="bg-green-50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-green-700">{bankApprovalRate}</div>
+              <div className="text-xs text-green-500 mt-0.5">Approval w/ Prefill</div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-gray-600">{withoutBank.length}</div>
+              <div className="text-xs text-gray-400 mt-0.5">Manual Entry</div>
+            </div>
+            <div className="bg-amber-50 rounded-xl p-4">
+              <div className="text-2xl font-bold text-amber-600">{nonBankApprovalRate}</div>
+              <div className="text-xs text-amber-500 mt-0.5">Approval w/o Prefill</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Status Summary */}
       <div className="card p-6">
         <h2 className="font-semibold text-gray-800 mb-4">Recent Applications</h2>
@@ -150,7 +206,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <div className="font-medium text-sm text-gray-800">{app.applicant?.firstName} {app.applicant?.lastName}</div>
-                    <div className="text-xs text-gray-400">{app.cardRequest?.cardType?.replace(/_/g, ' ')}</div>
+                    <div className="text-xs text-gray-400">{CARD_TYPE_LABELS[app.cardRequest?.cardType] || app.cardRequest?.cardType?.replace(/_/g, ' ')}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
