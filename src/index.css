@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply text-citizens-charcoal;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-citizens-charcoal;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-citizens-green hover:bg-citizens-green-dark active:bg-citizens-green-dark text-white font-semibold py-2 px-5 rounded transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center;
+  }
+  .btn-secondary {
+    @apply bg-white hover:bg-citizens-green-light active:bg-citizens-green-light text-citizens-green border border-citizens-green font-semibold py-2 px-5 rounded transition-colors duration-150 inline-flex items-center justify-center;
+  }
+  .btn-ghost {
+    @apply bg-transparent hover:bg-citizens-green-light text-citizens-green font-medium py-2 px-4 rounded transition-colors duration-150;
+  }
+  .card {
+    @apply bg-white rounded-lg shadow-card border border-citizens-border;
+  }
+  .card-hover {
+    @apply card hover:shadow-card-hover transition-shadow duration-200;
+  }
+  .form-input {
+    @apply w-full border border-citizens-border rounded px-3 py-2 text-sm text-citizens-charcoal bg-white focus:outline-none focus:ring-2 focus:ring-citizens-green focus:border-citizens-green placeholder-gray-400;
+  }
+  .section-label {
+    @apply block text-xs font-semibold uppercase tracking-wider text-citizens-gray mb-1.5;
+  }
+  .tag-green {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-citizens-green-light text-citizens-green-dark;
+  }
+}
