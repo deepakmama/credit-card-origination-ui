@@ -1,4 +1,5 @@
 const STATUS_STYLES = {
+  PRE_APPROVED:        'bg-creditcard-purple/10 text-creditcard-purple border border-creditcard-purple/30',
   SUBMITTED:           'bg-gray-100 text-gray-600',
   KYC_REVIEW:          'bg-blue-50 text-blue-700 border border-blue-200',
   FRAUD_SCREENING:     'bg-amber-50 text-amber-700 border border-amber-200',
@@ -13,6 +14,7 @@ const STATUS_STYLES = {
 }
 
 const STATUS_DOTS = {
+  PRE_APPROVED:        'bg-creditcard-purple',
   SUBMITTED:           'bg-gray-400',
   KYC_REVIEW:          'bg-blue-500',
   FRAUD_SCREENING:     'bg-amber-500',

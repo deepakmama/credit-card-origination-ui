@@ -1,4 +1,5 @@
 const BASE_STEPS = [
+  { key: 'PRE_APPROVED',        label: 'Pre-Approved', icon: '🎯' },
   { key: 'SUBMITTED',           label: 'Submitted',   icon: '📋' },
   { key: 'KYC_REVIEW',          label: 'KYC',         icon: '🪪' },
   { key: 'FRAUD_SCREENING',     label: 'Fraud',       icon: '🔍' },
@@ -11,14 +12,14 @@ const BASE_STEPS = [
 const BALANCE_TRANSFER_STEP = { key: 'BALANCE_TRANSFER', label: 'Balance Transfer', icon: '🔄' }
 
 const STATUS_ORDER = {
-  SUBMITTED: 0, KYC_REVIEW: 1, FRAUD_SCREENING: 2,
-  CREDIT_REVIEW: 3, INCOME_VERIFICATION: 4, CARD_ISSUED: 5,
-  AUTH_USER_ADDED: 6, AUTH_USER_SKIPPED: 6, BALANCE_TRANSFER_INITIATED: 7,
+  PRE_APPROVED: 0, SUBMITTED: 1, KYC_REVIEW: 2, FRAUD_SCREENING: 3,
+  CREDIT_REVIEW: 4, INCOME_VERIFICATION: 5, CARD_ISSUED: 6,
+  AUTH_USER_ADDED: 7, AUTH_USER_SKIPPED: 7, BALANCE_TRANSFER_INITIATED: 8,
   DENIED: -1, MANUAL_REVIEW: -2,
 }
 
-const AUTH_USER_STEP_IDX = 6
-const BALANCE_TRANSFER_STEP_IDX = 7
+const AUTH_USER_STEP_IDX = 7
+const BALANCE_TRANSFER_STEP_IDX = 8
 
 export default function PipelineTracker({ status, isBalanceTransfer }) {
   const isDenied   = status === 'DENIED'

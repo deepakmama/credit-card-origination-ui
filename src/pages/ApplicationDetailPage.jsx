@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getApplication, reprocessApplication } from '../api/cardApi'
+import { getApplication, reprocessApplication, submitPreapproved } from '../api/cardApi'
 import StatusBadge from '../components/StatusBadge'
 import PipelineTracker from '../components/PipelineTracker'
 import IssuedCardPanel from '../components/IssuedCardPanel'
@@ -9,6 +9,10 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import AuthUserPanel from '../components/AuthUserPanel'
 import BalanceTransferPanel from '../components/BalanceTransferPanel'
 import AdverseActionLetter from '../components/AdverseActionLetter'
+import SpendControlPanel from '../components/SpendControlPanel'
+import AuditTrailPanel from '../components/AuditTrailPanel'
+import ReengagementPanel from '../components/ReengagementPanel'
+import WelcomeJourneyPanel from '../components/WelcomeJourneyPanel'
 
 const fmt = (n) => n != null ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n) : '—'
 const fmtDate = (d) => d ? new Date(d).toLocaleString() : '—'
@@ -22,14 +26,7 @@ const TEST_SSNS = [
   { ssn: '000-00-0000', label: 'Identity Fail' },
 ]
 
-function MetricTile({ label, value, color }) {
-  return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <div className="text-xs font-semibold uppercase tracking-wider mb-1 opacity-75">{label}</div>
-      <div className="text-2xl font-bold">{value ?? '—'}</div>
-    </div>
-  )
-}
+const POST_ISSUANCE_STATUSES = ['CARD_ISSUED', 'AUTH_USER_ADDED', 'AUTH_USER_SKIPPED', 'BALANCE_TRANSFER_INITIATED']
 
 function InfoRow({ label, value }) {
   return (
@@ -49,6 +46,9 @@ export default function ApplicationDetailPage() {
   const [reprocessError, setReprocessError] = useState(null)
   const [error, setError] = useState(null)
   const [showLetter, setShowLetter] = useState(false)
+  const [preApprovedForm, setPreApprovedForm] = useState({ annualIncome: '', monthlyHousingPayment: '' })
+  const [submittingPreApproved, setSubmittingPreApproved] = useState(false)
+  const [preApprovedError, setPreApprovedError] = useState(null)
 
   const loadApp = () => {
     setLoading(true)
@@ -79,6 +79,31 @@ export default function ApplicationDetailPage() {
   const cashflowColor = (c) => !c ? 'text-gray-400' : c >= 750 ? 'text-green-600' : c >= 680 ? 'text-amber-600' : 'text-red-600'
 
   const canReprocess = app.status === 'DENIED' || app.status === 'MANUAL_REVIEW'
+  const isPostIssuance = POST_ISSUANCE_STATUSES.includes(app.status)
+  const isPreApproved = app.status === 'PRE_APPROVED'
+
+  const preApprovedFormReady =
+    preApprovedForm.annualIncome !== '' &&
+    parseFloat(preApprovedForm.annualIncome) > 0 &&
+    preApprovedForm.monthlyHousingPayment !== ''
+
+  const handleSubmitPreApproved = async (e) => {
+    e.preventDefault()
+    if (!preApprovedFormReady) return
+    setSubmittingPreApproved(true)
+    setPreApprovedError(null)
+    try {
+      const updated = await submitPreapproved(id, {
+        annualIncome: parseFloat(preApprovedForm.annualIncome),
+        monthlyHousingPayment: parseFloat(preApprovedForm.monthlyHousingPayment) || 0,
+      })
+      setApp(updated)
+    } catch (e) {
+      setPreApprovedError(e.response?.data?.message || e.message)
+    } finally {
+      setSubmittingPreApproved(false)
+    }
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -112,6 +137,102 @@ export default function ApplicationDetailPage() {
       </div>
 
       {showLetter && <AdverseActionLetter app={app} onClose={() => setShowLetter(false)} />}
+
+      {/* PRE_APPROVED — customer must fill income/housing to submit */}
+      {isPreApproved && (
+        <div className="mb-6 card p-6 border-2 border-creditcard-purple/40 bg-purple-50/30">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-creditcard-purple/10 flex items-center justify-center">
+              <svg className="w-5 h-5 text-creditcard-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-creditcard-purple">You've Been Pre-Approved!</h2>
+              <p className="text-sm text-gray-600">Your details have been pre-filled from the offer. Please provide your income information to complete and submit your application.</p>
+            </div>
+          </div>
+
+          {/* Pre-filled summary */}
+          <div className="grid grid-cols-2 gap-3 mb-5 bg-white rounded-xl p-4 border border-creditcard-purple/20">
+            <div>
+              <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Name</div>
+              <div className="text-sm font-medium text-gray-800">{app.applicant?.firstName} {app.applicant?.lastName}</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Card Type</div>
+              <div className="text-sm font-medium text-gray-800">
+                {{ CASH_BACK: 'Summit Reserve Cash Back', BALANCE_TRANSFER: 'Summit Balance Transfer', NEW_TO_CREDIT: 'Amp Starter' }[app.cardRequest?.cardType] || app.cardRequest?.cardType?.replace(/_/g, ' ')}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Email</div>
+              <div className="text-sm text-gray-700">{app.applicant?.email || '—'}</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Employment</div>
+              <div className="text-sm text-gray-700">{app.applicant?.employmentType?.replace(/_/g, ' ') || '—'}</div>
+            </div>
+            {app.cardRequest?.requestedCreditLimit && (
+              <div>
+                <div className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Pre-approved Limit</div>
+                <div className="text-sm font-semibold text-green-700">{fmt(app.cardRequest.requestedCreditLimit)}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Income form */}
+          <form onSubmit={handleSubmitPreApproved} className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700">Your Financial Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="section-label">Annual Income ($) *</label>
+                <input
+                  type="number"
+                  value={preApprovedForm.annualIncome}
+                  onChange={e => setPreApprovedForm(f => ({ ...f, annualIncome: e.target.value }))}
+                  placeholder="e.g. 75000"
+                  className="form-input"
+                  required
+                  min="1"
+                />
+              </div>
+              <div>
+                <label className="section-label">Monthly Housing Payment ($) *</label>
+                <input
+                  type="number"
+                  value={preApprovedForm.monthlyHousingPayment}
+                  onChange={e => setPreApprovedForm(f => ({ ...f, monthlyHousingPayment: e.target.value }))}
+                  placeholder="e.g. 1500 (rent or mortgage, enter 0 if none)"
+                  className="form-input"
+                  required
+                  min="0"
+                />
+              </div>
+            </div>
+            {preApprovedError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{preApprovedError}</div>
+            )}
+            <button
+              type="submit"
+              disabled={submittingPreApproved || !preApprovedFormReady}
+              className="w-full py-3 rounded-xl bg-creditcard-purple text-white font-bold text-base hover:bg-creditcard-purple/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {submittingPreApproved ? (
+                <>
+                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Processing through pipeline…
+                </>
+              ) : (
+                'Submit Application →'
+              )}
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Pipeline */}
       <div className="mb-6">
@@ -204,9 +325,14 @@ export default function ApplicationDetailPage() {
 
         {/* Right column */}
         <div className="space-y-5">
+          {/* Welcome Journey — shown for post-issuance */}
+          {isPostIssuance && (
+            <WelcomeJourneyPanel app={app} onUpdate={loadApp} />
+          )}
+
           {/* Issued Card */}
-          {['CARD_ISSUED', 'AUTH_USER_ADDED', 'AUTH_USER_SKIPPED', 'BALANCE_TRANSFER_INITIATED'].includes(app.status) && (
-            <IssuedCardPanel app={app} />
+          {isPostIssuance && (
+            <IssuedCardPanel app={app} onUpdate={loadApp} />
           )}
 
           {/* Auth User Panel — prompt when CARD_ISSUED */}
@@ -268,6 +394,16 @@ export default function ApplicationDetailPage() {
             </div>
           )}
 
+          {/* Spend Controls — post-issuance only */}
+          {isPostIssuance && (
+            <SpendControlPanel app={app} />
+          )}
+
+          {/* Re-engagement Campaigns — denied only */}
+          {app.status === 'DENIED' && (
+            <ReengagementPanel applicationId={app.id} />
+          )}
+
           {/* Document Upload */}
           <DocumentUploadPanel applicationId={app.id} status={app.status} />
 
@@ -296,6 +432,9 @@ export default function ApplicationDetailPage() {
               </button>
             </div>
           )}
+
+          {/* Audit Trail — always shown at the bottom */}
+          <AuditTrailPanel applicationId={app.id} />
         </div>
       </div>
     </div>

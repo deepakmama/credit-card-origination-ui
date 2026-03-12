@@ -6,6 +6,10 @@ import ApplicationListPage from './pages/ApplicationListPage'
 import ApplicationDetailPage from './pages/ApplicationDetailPage'
 import ThankYouPage from './pages/ThankYouPage'
 import DashboardPage from './pages/DashboardPage'
+import PrequalifyPage from './pages/PrequalifyPage'
+import ReviewQueuePage from './pages/ReviewQueuePage'
+import OffersPage from './pages/OffersPage'
+import AbTestPage from './pages/AbTestPage'
 
 export default function App() {
   return (
@@ -20,6 +24,10 @@ export default function App() {
             <Route path="/applications/:id" element={<ApplicationDetailPage />} />
             <Route path="/applications/:id/confirmation" element={<ThankYouPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/prequalify" element={<PrequalifyPage />} />
+            <Route path="/review-queue" element={<ReviewQueuePage />} />
+            <Route path="/offers" element={<OffersPage />} />
+            <Route path="/ab-test" element={<AbTestPage />} />
           </Routes>
         </main>
       </div>

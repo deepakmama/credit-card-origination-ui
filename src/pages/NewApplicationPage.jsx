@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { submitApplication } from '../api/cardApi'
 import CardTypeSelector from '../components/CardTypeSelector'
+import CardRecommenderPanel from '../components/CardRecommenderPanel'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ProveVerificationPanel from '../components/ProveVerificationPanel'
 
@@ -294,6 +295,8 @@ export default function NewApplicationPage() {
       {/* Step 2: Card Selection */}
       {step === 1 && (
         <form onSubmit={handleSubmit} className="space-y-4">
+          <CardRecommenderPanel onRecommend={v => set('cardType', v)} />
+
           <div className="card p-6 space-y-6">
             <CardTypeSelector value={form.cardType} onChange={v => set('cardType', v)} />
 

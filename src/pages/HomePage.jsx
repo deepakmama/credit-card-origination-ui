@@ -114,8 +114,8 @@ export default function HomePage() {
                 <Link to="/apply" className="btn-primary text-base px-7 py-3 shadow-green">
                   Apply Now
                 </Link>
-                <Link to="/applications" className="btn-secondary text-base px-7 py-3">
-                  View Applications
+                <Link to="/prequalify" className="btn-secondary text-base px-7 py-3">
+                  Check If You Qualify
                 </Link>
               </div>
               <p className="text-xs text-citizens-gray mt-4">No impact to your credit score to check your rate.</p>

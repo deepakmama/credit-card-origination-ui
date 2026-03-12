@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getApplications } from '../api/cardApi'
+import { getApplications, getOffers } from '../api/cardApi'
 import StatusBadge from '../components/StatusBadge'
 import LoadingSpinner from '../components/LoadingSpinner'
 
@@ -9,10 +9,13 @@ const pct = (n, d) => d ? Math.round(n / d * 100) + '%' : '0%'
 
 export default function DashboardPage() {
   const [apps, setApps] = useState([])
+  const [offers, setOffers] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getApplications().then(setApps).finally(() => setLoading(false))
+    Promise.all([getApplications(), getOffers().catch(() => [])])
+      .then(([a, o]) => { setApps(a); setOffers(o) })
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) return <LoadingSpinner message="Loading dashboard..." />
@@ -25,6 +28,11 @@ export default function DashboardPage() {
 
   const avgCreditScore = apps.filter(a => a.creditScore).reduce((s, a, _, arr) => s + a.creditScore / arr.length, 0)
   const avgLimit = issued.filter(a => a.creditLimit).reduce((s, a, _, arr) => s + a.creditLimit / arr.length, 0)
+
+  // Offer conversion
+  const offerTotal = offers.filter(o => o.status !== 'CANCELLED').length
+  const offerAccepted = offers.filter(o => o.status === 'ACCEPTED').length
+  const offerConvRate = offerTotal > 0 ? Math.round(offerAccepted / offerTotal * 100) : null
 
   // Prefill insights
   const withBank    = apps.filter(a => a.applicant?.existingBankRelationship)
@@ -60,7 +68,7 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {[
           { label: 'Total Applications', value: total, color: 'bg-citizens-green-light text-citizens-green' },
           { label: 'Approval Rate', value: pct(issued.length, total), color: 'bg-green-50 text-green-700' },
@@ -73,6 +81,25 @@ export default function DashboardPage() {
             <div className="text-sm font-medium opacity-75">{kpi.label}</div>
           </div>
         ))}
+
+        {/* Offer Conversion Rate */}
+        <Link to="/offers" className="card p-5 bg-creditcard-purple/10 text-creditcard-purple hover:bg-creditcard-purple/20 transition-colors block">
+          <div className="text-3xl font-bold mb-1">
+            {offerConvRate != null ? `${offerConvRate}%` : '—'}
+          </div>
+          <div className="text-sm font-medium opacity-75">Offer Conv. Rate</div>
+          <div className="text-xs mt-2 opacity-60">
+            {offerAccepted} of {offerTotal} offers accepted
+          </div>
+          {offerTotal > 0 && (
+            <div className="mt-2 h-1.5 bg-creditcard-purple/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-creditcard-purple rounded-full transition-all"
+                style={{ width: `${offerConvRate}%` }}
+              />
+            </div>
+          )}
+        </Link>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">

@@ -167,6 +167,7 @@ const CARD_TYPES = [
     limitRange: '$3,000 – $50,000',
     aprRange: '18.99% – 23.99%',
     highlight: 'Up to 3% cash back',
+    annualFee: '$295',
     network: 'MASTERCARD',
   },
   {
@@ -228,6 +229,12 @@ export default function CardTypeSelector({ value, onChange }) {
                       {card.minScore ?? 'None required'}
                     </span>
                   </div>
+                  {card.annualFee && (
+                    <div className="flex justify-between text-xs">
+                      <span className="text-citizens-gray">Annual Fee</span>
+                      <span className="font-medium text-citizens-charcoal">{card.annualFee}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </button>

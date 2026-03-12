@@ -18,8 +18,12 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinks = [
+    { to: '/prequalify',   label: 'Pre-qualify' },
     { to: '/apply',        label: 'Apply Now' },
     { to: '/applications', label: 'Applications' },
+    { to: '/offers',       label: 'Offers' },
+    { to: '/review-queue', label: 'Review Queue' },
+    { to: '/ab-test',      label: 'A/B Tests' },
     { to: '/dashboard',    label: 'Dashboard' },
   ]
 
