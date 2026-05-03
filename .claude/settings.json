@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/pre-bash-safety.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/post-edit-lint.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/post-bash-audit.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/on-stop-notify.sh"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/on-notification.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

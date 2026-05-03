@@ -112,7 +112,7 @@ export default function ProveVerificationPanel({ onPrefill }) {
               ) : 'Verify & Prefill'}
             </button>
           </div>
-          <p className="text-xs text-purple-500 mt-2">Try: 617-555-0001 + 6789 · 617-555-0002 + 3333 · 617-555-0003 + 5555 · 617-555-0004 + 4444</p>
+          <p className="text-xs text-purple-500 mt-2">Try (dashes optional): 6175550001 + 6789 · 6175550002 + 3333 · 6175550005 + 4321 · 6175550008 + 3344</p>
         </div>
       )}
     </div>

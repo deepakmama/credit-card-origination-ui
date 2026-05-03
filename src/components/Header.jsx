@@ -20,11 +20,14 @@ export default function Header() {
   const navLinks = [
     { to: '/prequalify',   label: 'Pre-qualify' },
     { to: '/apply',        label: 'Apply Now' },
+    { to: '/ai-apply',     label: 'AI Apply', ai: true },
+    { to: '/agents',       label: 'Intelligent Command Center', ai: true },
     { to: '/applications', label: 'Applications' },
     { to: '/offers',       label: 'Offers' },
     { to: '/review-queue', label: 'Review Queue' },
     { to: '/ab-test',      label: 'A/B Tests' },
-    { to: '/dashboard',    label: 'Dashboard' },
+    { to: '/dashboard',       label: 'Dashboard' },
+    { to: '/configurations',  label: 'Configurations' },
   ]
 
   const isActive = (to) =>
@@ -58,20 +61,37 @@ export default function Header() {
           {/* Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`px-4 py-2 text-sm font-semibold transition-colors rounded relative ${
-                  isActive(link.to)
-                    ? 'text-citizens-green'
-                    : 'text-citizens-gray-dark hover:text-citizens-green'
-                }`}
-              >
-                {link.label}
-                {isActive(link.to) && (
-                  <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-citizens-green rounded-full" />
-                )}
-              </Link>
+              link.ai ? (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-1 px-2 py-1 text-xs font-bold rounded-full border transition-colors whitespace-nowrap ${
+                    isActive(link.to)
+                      ? 'bg-creditcard-purple text-white border-creditcard-purple'
+                      : 'border-creditcard-purple text-creditcard-purple hover:bg-creditcard-purple hover:text-white'
+                  }`}
+                >
+                  <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  {link.label}
+                </Link>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`px-4 py-2 text-sm font-semibold transition-colors rounded relative ${
+                    isActive(link.to)
+                      ? 'text-citizens-green'
+                      : 'text-citizens-gray-dark hover:text-citizens-green'
+                  }`}
+                >
+                  {link.label}
+                  {isActive(link.to) && (
+                    <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-citizens-green rounded-full" />
+                  )}
+                </Link>
+              )
             ))}
           </nav>
 

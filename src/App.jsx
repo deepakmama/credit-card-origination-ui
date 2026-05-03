@@ -10,6 +10,9 @@ import PrequalifyPage from './pages/PrequalifyPage'
 import ReviewQueuePage from './pages/ReviewQueuePage'
 import OffersPage from './pages/OffersPage'
 import AbTestPage from './pages/AbTestPage'
+import ConfigurationsPage from './pages/ConfigurationsPage'
+import ChatApplyPage from './pages/ChatApplyPage'
+import AgentsPage from './pages/AgentsPage'
 
 export default function App() {
   return (
@@ -28,6 +31,9 @@ export default function App() {
             <Route path="/review-queue" element={<ReviewQueuePage />} />
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/ab-test" element={<AbTestPage />} />
+            <Route path="/configurations" element={<ConfigurationsPage />} />
+            <Route path="/ai-apply" element={<ChatApplyPage />} />
+            <Route path="/agents" element={<AgentsPage />} />
           </Routes>
         </main>
       </div>
