@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/pre-bash-safety.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash /Users/deepaknayak/Downloads/credit-card-origination-ui/.claude/hooks/pre-secrets-guard.sh"
           }
         ]
       }
